@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RabbitMQ AMQP Client Example</title>
+  </head>
+  <body>
+    <h1>RabbitMQ AMQP Client</h1>
+    <script type="module">
+      import { AMQPWebSocketClient } from 'https://cdn.jsdelivr.net/npm/@cloudamqp/amqp-client@3.1.1/dist/amqp-websocket-client.mjs'
+
+      async function run() {
+        const url = "ws://0.0.0.0:15670/ws"; // RabbitMQ WebSocket URL
+        // const url = "wss://0.0.0.0:15670/ws/amqp"; // RabbitMQ WebSocket URL
+        const client = new AMQPWebSocketClient(url, "/", "admin", "admin");
+
+        try {
+          // Connect to RabbitMQ
+          const connection = await client.connect();
+          console.log("Connected to RabbitMQ");
+
+          // Create a channel
+          const channel = await connection.channel();
+
+          // Declare a queue
+          const queue = "test-queue";
+          await channel.queueDeclare(queue);
+
+          // Publish a message
+          const message = "Hello, RabbitMQ!";
+          await channel.basicPublish(
+            "",
+            queue,
+            new TextEncoder().encode(message),
+          );
+          console.log(`Sent: ${message}`);
+
+          // Consume messages from the queue
+          await channel.basicConsume(queue, (msg) => {
+            const text = new TextDecoder().decode(msg.body);
+            console.log(`Received: ${text}`);
+            channel.basicAck(msg.deliveryTag);
+          });
+        } catch (err) {
+          console.error("Failed to connect or communicate with RabbitMQ:", err);
+        }
+      }
+
+      window.onload = () => {
+        run();
+      };
+    </script>
+
+    <!-- <script type="module">
+      import * as amqp from 'https://cdn.jsdelivr.net/npm/@cloudamqp/amqp-client@3.1.1/+esm'
+      console.log(amqp.AMQPClient);
+      window.AmqpClient = amqp;
+    </script> -->
+    <!-- <script >
+
+        async function run() {
+          const amqp = window.AmqpClient;
+          console.log(window.AmqpClient);
+            const url = "ws://localhost:15674/ws"; // RabbitMQ WebSocket URL
+            const client = new amqp.AMQPClient(url);
+
+        //     try {
+        //         // Connect to RabbitMQ
+        //         const connection = await client.connect();
+        //         console.log("Connected to RabbitMQ");
+
+        //         // Create a channel
+        //         const channel = await connection.channel();
+
+        //         // Declare a queue
+        //         const queue = "test-queue";
+        //         await channel.queueDeclare(queue);
+
+        //         // Publish a message
+        //         const message = "Hello, RabbitMQ!";
+        //         await channel.basicPublish("", queue, new TextEncoder().encode(message));
+        //         console.log(`Sent: ${message}`);
+
+        //         // Consume messages from the queue
+        //         await channel.basicConsume(queue, (msg) => {
+        //             const text = new TextDecoder().decode(msg.body);
+        //             console.log(`Received: ${text}`);
+        //             channel.basicAck(msg.deliveryTag);
+        //         });
+
+        //     } catch (err) {
+        //         console.error("Failed to connect or communicate with RabbitMQ:", err);
+        //     }
+        }
+
+       window.onload = () => {
+        run();
+       }
+    </script> -->
+  </body>
+</html>

@@ -1,0 +1,34 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    restart: always
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # Default port for RabbitMQ
+      # - "5671:5671" # TLS-enabled AMQP port (optional, default for TLS)
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin # Default username
+      RABBITMQ_DEFAULT_PASS: admin # Default password
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"] # Check if RabbitMQ is responding
+      interval: 10s # Check every 10 seconds
+      timeout: 5s # Timeout after 5 seconds
+      retries: 5 # Retry 5 times before considering it unhealthy
+    volumes:
+      - ./rabbitmq-data:/var/lib/rabbitmq # Persistent data storage
+      # - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      # - ./ssl:/etc/rabbitmq/ssl
+
+  websocket-tcp-relay:
+    image: cloudamqp/websocket-tcp-relay:latest
+    container_name: websocket-tcp-relay
+    ports:
+      - "15670:15670" # Map host port 15670 to container port 15670
+    volumes:
+      - ./config-websocket-tcp-reply.ini:/etc/websocket-tcp-relay/config.ini # Mount config file
+      # - ./ssl:/etc/ssl/certs
+    command: --config /etc/websocket-tcp-relay/config.ini
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
