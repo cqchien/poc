@@ -2066,7 +2066,7 @@ class AMQPWebSocketClient extends AMQPBaseClient {
       this.frameBuffer = new Uint8Array(frameMax);
   }
   connect() {
-      const socket = new WebSocket(this.url, ['mqtt']);
+      const socket = new WebSocket(this.url);
       this.socket = socket;
       socket.binaryType = "arraybuffer";
       socket.onmessage = this.handleMessage.bind(this);
