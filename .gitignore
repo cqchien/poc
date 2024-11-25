@@ -1,2 +1,4 @@
 rabbitmq/rabbitmq-data
 rabbitmq/node_modules
+
+serverless-aws/node_modules
